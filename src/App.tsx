@@ -1,17 +1,36 @@
 import React from "react";
 import { Header } from "./components/UI/Header/Header";
+import { LoginPage } from "./pages/LoginPage/LoginPage";
+import { MainPage } from "./pages/MainPage/MainPage";
 import { RegistrationPage } from "./pages/RegistrationPage/RegistrationPage";
-// import { LoginPage } from "./pages/LoginPage/LoginPage";
-// import { MainPage } from "./pages/MainPage/MainPage";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { ProfilePage } from "./pages/ProfilePage/ProfilePage";
 
 const App: React.FC = () => {
+
+  const router = createBrowserRouter([
+    {
+      path:"/",
+      element:<LoginPage/>
+    },
+    {
+      path:"/main-page",
+      element:<MainPage/>
+    },
+    {
+      path:"/registration-page",
+      element:<RegistrationPage/>
+    },
+    {
+      path:"/profile-page",
+      element:<ProfilePage/>
+    }
+  ])
+
   return (
     <div className="App">
-      <Header />
       <div className="container">
-        {/* <LoginPage /> */}
-        {/* <MainPage /> */}
-        <RegistrationPage />
+        <RouterProvider router={router}/>
       </div>
     </div>
   );
