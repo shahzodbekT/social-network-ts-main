@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 // import "./LoginPage.scss";
 import { Heading } from "../../components/Typography/Heading/Heading";
 import { RegistrationInfo } from "../../components/RegistrationInfo/RegistrationInfo";
@@ -7,8 +7,20 @@ import { AppInput } from "../../components/UI/AppInput/AppInput";
 import { LoginStyle } from "./LoginPage.style";
 import { useForm, Controller } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import * as yup from 'yup'
+import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useDispatch, useSelector } from "react-redux";
+import { changeUser } from "../../store/userSlice";
+import { RootState } from "../../store/store";
+
+const mockUser = {
+  mail: 'jeremy@gmail.com',
+  phone_number: '972950000',
+  user_id: 1,
+  name: 'Vasya',
+  reg_date: new Date().toISOString,
+  city: 'Mahachkala',
+};
 
 const loginPageFields = {
   userEmail: "",
@@ -16,9 +28,15 @@ const loginPageFields = {
 };
 
 const loginValidationSchema = yup.object({
-  userEmail: yup.string().required('Обязательное поле').email("Формат должен соответствовать формату email"),
-  userPassword: yup.string().required('Обязательное поле').min(4, "Пароль должен содержать как минимум 4 символа"),
-})
+  userEmail: yup
+    .string()
+    .required("Обязательное поле")
+    .email("Формат должен соответствовать формату email"),
+  userPassword: yup
+    .string()
+    .required("Обязательное поле")
+    .min(4, "Пароль должен содержать как минимум 4 символа"),
+});
 
 export const LoginPage = () => {
   const {
@@ -30,14 +48,24 @@ export const LoginPage = () => {
     resolver: yupResolver(loginValidationSchema),
   });
 
-  const navigate = useNavigate()
+  const user = useSelector((state: RootState) => state.user.user);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const onLoginFormSubmit = (data: any) => {
-    console.log(data);
-    if (data) {
-      navigate('/main-page')
-    }
+  const onLoginFormSubmit = (data: any) => { 
+    // if (data) {
+    //   navigate("/main-page");
+    // }
+    dispatch(changeUser(mockUser));
   };
+
+  useEffect(() => {
+    console.log('USER: ', user)
+
+    if(user?.user_id) {
+      navigate('/profile-page')
+    }
+  }, [user])
 
   return (
     <LoginStyle>

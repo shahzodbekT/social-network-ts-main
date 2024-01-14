@@ -7,8 +7,13 @@ import { AppInput } from "../../components/UI/AppInput/AppInput";
 import { RegistrationStyle } from "./RegistrationPage.style";
 import { useForm, Controller } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { RootState } from "../../store/store";
+import { authUser } from "../../store/authSlice";
+import { useEffect } from "react";
+import { changeUser } from "../../store/userSlice";
 
 const registrationPageFields = {
   userName: "",
@@ -16,6 +21,15 @@ const registrationPageFields = {
   userPhoneNumber: "",
   userPassword: "",
   userCity: "",
+};
+
+const mockUser = {
+  mail: 'jeremy@gmail.com',
+  phone_number: '972950000',
+  user_id: 1,
+  name: 'Vasya',
+  reg_date: new Date().toISOString,
+  city: 'Mahachkala',
 };
 
 const registrationValidationSchema = yup.object({
@@ -42,14 +56,21 @@ export const RegistrationPage = () => {
     resolver: yupResolver(registrationValidationSchema),
   });
 
+  const user = useSelector((state: RootState) => state.auth.user);
   const navigate = useNavigate();
+  const dispatch = useDispatch()
 
   const onLoginFormSubmit = (data: any) => {
-    console.log(data);
-    if (data) {
-      navigate("/main-page");
-    }
+    dispatch(authUser(mockUser));
   };
+
+  useEffect(() => {
+    console.log('USER: ', user)
+
+    if(user?.user_id) {
+      navigate('/main-page')
+    }
+  }, [user])
 
   return (
     <RegistrationStyle>
