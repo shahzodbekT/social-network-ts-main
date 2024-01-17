@@ -11,9 +11,8 @@ import { useDispatch, useSelector } from "react-redux";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { RootState } from "../../store/store";
-import { authUser } from "../../store/authSlice";
 import { useEffect } from "react";
-import { changeUser } from "../../store/userSlice";
+import { useRegisterUserMutation } from "../../store/Api/authApi";
 
 const registrationPageFields = {
   userName: "",
@@ -21,15 +20,6 @@ const registrationPageFields = {
   userPhoneNumber: "",
   userPassword: "",
   userCity: "",
-};
-
-const mockUser = {
-  mail: 'jeremy@gmail.com',
-  phone_number: '972950000',
-  user_id: 1,
-  name: 'Vasya',
-  reg_date: new Date().toISOString,
-  city: 'Mahachkala',
 };
 
 const registrationValidationSchema = yup.object({
@@ -56,21 +46,20 @@ export const RegistrationPage = () => {
     resolver: yupResolver(registrationValidationSchema),
   });
 
-  const user = useSelector((state: RootState) => state.auth.user);
   const navigate = useNavigate();
-  const dispatch = useDispatch()
+  const [registerUser, {data: userData}] = useRegisterUserMutation();
 
   const onLoginFormSubmit = (data: any) => {
-    dispatch(authUser(mockUser));
+    registerUser({name: data.userName, password: data.userPassword, email: data.userEmail, phone_number: data.userPhoneNumber, user_city: data.userCity})
   };
 
   useEffect(() => {
-    console.log('USER: ', user)
+    console.log('USER: ', userData)
 
-    if(user?.user_id) {
-      navigate('/main-page')
+    if(userData?.user_id) {
+      navigate('/')
     }
-  }, [user])
+  }, [userData, navigate])
 
   return (
     <RegistrationStyle>
@@ -142,7 +131,7 @@ export const RegistrationPage = () => {
       <a href="#">Забыли пароль?</a>
       <RegistrationInfo
         text="Уже есть аккаунт?"
-        path="/login-page"
+        path="/"
         text2=" Войти"
       />
     </RegistrationStyle>
