@@ -1,11 +1,63 @@
 import { PostItem } from "../../Types/post";
 import { format } from "date-fns";
+import { PostConfigDropdown } from "./PostConfigDropdown";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAddPostPhotoMutation } from "../../store/Api/fileApi";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 type PostProps = {
   post: PostItem;
+  handleEditPost: (post: PostItem) => void;
+  onDeletePostClick?: () => void;
+  onPhotoAddedToPost?: () => void;
 };
 
-export const Post = ({ post }: PostProps) => {
+export const Post = ({
+  post,
+  handleEditPost,
+  onDeletePostClick,
+  onPhotoAddedToPost
+}: PostProps) => {
+  const [isDropdownOpen, toggleDropdown] = useState<boolean>(false);
+  const navigate = useNavigate();
+  const [uploadFile, { isSuccess, isError }] = useAddPostPhotoMutation();
+
+  const onEditPostClick = () => {
+    handleEditPost(post);
+    toggleDropdown(false);
+  };
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success("Файл загружен успешно")
+      if (typeof onPhotoAddedToPost === 'function') {
+        onPhotoAddedToPost()
+      }
+    }
+    if (isError) {
+      toast.error("Произошла ошибка")
+    }
+  }, [isSuccess, isError])
+
+  const onPostClick = () => {
+    navigate(`/post/${post.id}`);
+  };
+
+  const handelFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files?.length) {
+      const formData = new FormData();
+
+      const photoFile = event.target.files[0];
+
+      formData.append("post_id", `${post.id}`);
+      formData.append("photo_file", photoFile);
+
+      uploadFile(formData)
+    }
+  };
+
   return (
     <div className="Post _liked _marked">
       <div className="UserElem">
@@ -15,11 +67,13 @@ export const Post = ({ post }: PostProps) => {
             {post.user_fk.name}
           </a>
           <p className="secondary__text">
-            {format(new Date(post.reg_date), "yyyy.MM do EEEE")}
+            {format(new Date(post.reg_date), "yyyy MM do EEEE")}
           </p>
         </div>
       </div>
-      <p className="Post__text">{post.main_text}</p>
+      <p className="Post__text" onClick={() => onPostClick()}>
+        {post.main_text}
+      </p>
       {!!post.photos.length && (
         <div className="media-container">
           {post.photos.map((photo) => (
@@ -33,32 +87,8 @@ export const Post = ({ post }: PostProps) => {
         </div>
       )}
       <div className="PostControls">
-        <div className="icon-wrapper like">
-          <span className="count likes-count">-500</span>
-          <svg
-            className="icon icon-like"
-            viewBox="0 0 23 23"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              id="icon"
-              d="M11.5 23L9.8325 21.3455C3.91 15.4921 0 11.6191 0 6.89373C0 3.02071 2.783 0 6.325 0C8.326 0 10.2465 1.01526 11.5 2.60708C12.7535 1.01526 14.674 0 16.675 0C20.217 0 23 3.02071 23 6.89373C23 11.6191 19.09 15.4921 13.1675 21.3455L11.5 23Z"
-            />
-          </svg>
-        </div>
         <div className="icon-wrapper comment">
-          <span className="count comments-count">500</span>
-          <svg
-            className="icon icon-comment"
-            viewBox="0 0 26 26"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              id="comment"
-              d="M9.25 25.5C8.91848 25.5 8.60054 25.3683 8.36612 25.1339C8.1317 24.8995 8 24.5815 8 24.25V20.5H3C2.33696 20.5 1.70107 20.2366 1.23223 19.7678C0.763392 19.2989 0.5 18.663 0.5 18V3C0.5 2.33696 0.763392 1.70107 1.23223 1.23223C1.70107 0.763392 2.33696 0.5 3 0.5H23C23.663 0.5 24.2989 0.763392 24.7678 1.23223C25.2366 1.70107 25.5 2.33696 25.5 3V18C25.5 18.663 25.2366 19.2989 24.7678 19.7678C24.2989 20.2366 23.663 20.5 23 20.5H15.375L10.75 25.1375C10.5 25.375 10.1875 25.5 9.875 25.5H9.25ZM10.5 18V21.85L14.35 18H23V3H3V18H10.5Z"
-              fill="#6D6F7A"
-            />
-          </svg>
+          <input type="file" placeholder="Загрузить изображение" onChange={handelFileUpload}/>
         </div>
         <div className="icon-wrapper repost">
           <svg
@@ -115,6 +145,7 @@ export const Post = ({ post }: PostProps) => {
         className="icon icon-more"
         viewBox="0 0 25 5"
         xmlns="http://www.w3.org/2000/svg"
+        onClick={() => toggleDropdown(!isDropdownOpen)}
       >
         <g id="more">
           <circle id="ellipse" cx="22.5" cy="2.5" r="2.5" />
@@ -122,6 +153,14 @@ export const Post = ({ post }: PostProps) => {
           <circle id="ellipse_3" cx="2.5" cy="2.5" r="2.5" />
         </g>
       </svg>
+      {typeof onDeletePostClick === "function" && (
+        <PostConfigDropdown
+          isDropdownOpen={isDropdownOpen}
+          onEditPostClick={onEditPostClick}
+          onDeletePostClick={onDeletePostClick}
+        />
+      )}
+      <ToastContainer/>
     </div>
   );
 };

@@ -7,10 +7,8 @@ import { AppInput } from "../../components/UI/AppInput/AppInput";
 import { RegistrationStyle } from "./RegistrationPage.style";
 import { useForm, Controller } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { RootState } from "../../store/store";
 import { useEffect } from "react";
 import { useRegisterUserMutation } from "../../store/Api/authApi";
 

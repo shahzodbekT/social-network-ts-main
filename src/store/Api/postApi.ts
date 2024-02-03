@@ -7,7 +7,7 @@ interface getPostListResult {
   message: PostItem[];
 }
 
-export const postApi = createApi({ 
+export const postApi = createApi({
   reducerPath: "postApi",
   baseQuery: fetchBaseQuery({ baseUrl }),
   endpoints: (builder) => ({
@@ -19,11 +19,37 @@ export const postApi = createApi({
     }),
     getPostListItem: builder.query({
       query: (postId: string) => ({
-        url: `/post?post_id=${postId}`,
+        url: `/post/?post_id=${postId}`,
         method: "GET",
+      }),
+    }),
+    addNewPost: builder.mutation({
+      query: (payload) => ({
+        url: "/post",
+        method: "POST",
+        body: payload,
+      }),
+    }),
+    editPost: builder.mutation({
+      query: (payload: { post_id: number; new_text: string }) => ({
+        url: `/post/?post_id=${payload.post_id}`,
+        method: "POST",
+        body: payload,
+      }),
+    }),
+    deletePost: builder.mutation({
+      query: (payload: { post_id: number }) => ({
+        url: `/post/?post_id=${payload.post_id}`,
+        method: "DELETE",
       }),
     }),
   }),
 });
 
-export const { useGetPostListQuery } = postApi;
+export const {
+  useLazyGetPostListQuery,
+  useAddNewPostMutation,
+  useGetPostListItemQuery,
+  useEditPostMutation,
+  useDeletePostMutation
+} = postApi;
